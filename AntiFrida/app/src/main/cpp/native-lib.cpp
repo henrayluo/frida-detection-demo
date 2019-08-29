@@ -9,12 +9,15 @@
 #include <android/log.h>
 #include <unistd.h>
 #include <errno.h>
+#include <time.h>
 
 #define APPNAME "FridaDetectionTest"
 #define MAX_LINE 512
 
 extern "C" int my_openat(int, const char*, int, int);
 extern "C" int my_read(int, void*, int);
+extern "C" int my_read(int, void*, int);
+extern "C" int my_clock_gettime(clockid_t, struct timespec *);
 
 static char keyword[] = "LIBFRIDA";
 
@@ -38,7 +41,7 @@ void *detect_frida_loop(void *) {
     int ret;
     int i;
 
-    while (1) {
+    while (true) {
 
         /*
          * 1: Frida Server Detection.
@@ -103,10 +106,12 @@ void *detect_frida_loop(void *) {
 extern "C"
 JNIEXPORT void JNICALL Java_sg_vantagepoint_antifrida_MainActivity_init(JNIEnv *env, jobject thisObj) {
 
-    pthread_t t;
+//    pthread_t t;
+//    pthread_create(&t, nullptr, detect_frida_loop, (void *) nullptr);
 
-    pthread_create(&t, NULL, detect_frida_loop, (void *)NULL);
-
+    struct timespec start{};
+    clock_gettime(CLOCK_MONOTONIC, &start);	/* mark start time */
+    __android_log_print(ANDROID_LOG_VERBOSE, keyword, "%ld - %ld", start.tv_sec, start.tv_nsec);
 }
 
 
